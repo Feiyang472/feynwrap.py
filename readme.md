@@ -2,8 +2,6 @@
 
 Purpose: Writing tikz makes me sad, so I wrap a layer of python around it to allow continuous creation of vertices and edges in Feynman diagrams.
 
-Honestly, it
-
 Drell-Yan Example:
 ```python
 from feynwrap import node
