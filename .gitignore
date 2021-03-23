@@ -1,3 +1,2 @@
-/demo.aux
-/tikz-feyn.aux
-/tikz-feyn.log
+*.aux
+*.log
