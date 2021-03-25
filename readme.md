@@ -2,22 +2,41 @@
 
 Purpose: Writing tikz makes me sad, so I wrap a layer of python around it to allow continuous creation of vertices and edges in Feynman diagrams.
 
-Drell-Yan Example:
+## Installation
+```bash
+git clone https://github.com/Feiyang472/feynwrap.py.git
+
+pip3 install .
+```
+
+
+## Getting started
+The main class to create a vertex is `vert`.
 ```python
 from feynwrap import node
 
-# create a starting vertex
-quark = node(vert='q')
+quark = vert('q')
+```
+Once a vertex instance is created, one can call `propagate` or abbreviated `ppgt` from it.
+```python
+emVertex = quark.ppgt('below right')
 
-# br stands for below right, other options include bl, al, ar
-emVertex = quark.br().bl(vert='\\bar{{q}}', end=True)
+# br, bl, al, ar are aliases for below right, below left, etc.
+emVertex = emVertex.bl(r'\bar{q}',True)
+```
+`ppgt` takes arguments which are either strings or Booleans, in any order, without keywords. "Special" strings get recognized.
+- `'fermion'`(default), `'boson'`, or `'gluon'` are  propagator specifiers
+- `right`(default), `above left`, `below right`, etc. specify the position of the next vertex with respect to the calling instance.
+- `True` or `False`(default) indicates whether the current vertex is a vertex at ends of the diagram. If `True`, the calling vertex is returned. Otherwise the destination vertex is returned.
+- A string which isn't a propagator type or a location will be recognized as a label. The package will decide whether to put the label on the edge or the vertex
 
-# Let's goooooo
-emVertex.propag(line='b',edge='\\gamma').br(vert='l',end=True).ar('af',vert='\\bar{{l}}')
+We can continue with the same example to do some more. Save to `tikz-feynman` format and compile to pdf.
+```python
+emVertex.ppgt(r'\gamma', 'boson').br('l',True).ar('anti fermion',r'\bar{l}', True)
 
-node.save('demo.tex')
+node.save('./examples/demo.tex')
 
-os.system("pdflatex --interaction=batchmode tikz-feyn.tex")
+os.system("cd examples; pdflatex --interaction=batchmode -jobname=demo1 tikz-feyn.tex; rm *.log *.aux")
 ```
 
 Result
@@ -26,13 +45,13 @@ Result
 
 The above example is the same as the following one liner
 ```python
-node(vert='q').br().bl(vert='\\bar{{q}}', end=True).propag(line='b',edge='\\gamma').br(vert='l',end=True).ar('af',vert='\\bar{{l}}')
+vert('q').br().bl(r'\bar{q}',True).ppgt(r'\gamma', 'boson').br('l',True).ar('anti fermion',r'\bar{l}', True)
 ```
 
 I wrote in python because programming in LaTeX is a pain.
 
 -------------------------
-This is the generated `demo.tex`
+This is the generated `demo.tex`.
 ```latex
 \begin{tikzpicture}
 \begin{feynhand}
@@ -50,5 +69,4 @@ This is the generated `demo.tex`
 \propag [anti fermion] (v4) to (v6);
 \end{feynhand}
 \end{tikzpicture}
-
 ```
