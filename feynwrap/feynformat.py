@@ -36,3 +36,25 @@ def feyn_arg_sort(args):
 def propagate_format(line, this_vi, next_vi, edge):
     edge_format = '' if not edge else '[edge label = \\({}\\)]'.format(edge)
     return '\n\\propag [{}] (v{}) to {}(v{});'.format(line, this_vi, edge_format, next_vi)
+
+
+def wrap_tikz(content):
+    return ("\\begin{{tikzpicture}}"
+            "\n\\begin{{feynhand}}\n{}\n\\end{{feynhand}}"
+            "\n\\end{{tikzpicture}}\n").format(content)
+    
+headfoot = """
+\\documentclass{{article}} 
+\\usepackage{{tikz}}
+\\usepackage[compat=1.1.0]{{tikz-feynhand}}
+
+\\usepackage[active,tightpage]{{preview}}
+\\PreviewEnvironment{{tikzpicture}} 
+
+\\begin{{document}}
+
+{}
+
+\\end{{document}}
+"""
+

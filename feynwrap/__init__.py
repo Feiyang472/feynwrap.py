@@ -1,6 +1,7 @@
 """
 Feynman Diagram wrapper
 """
+from os import system as bash
 import feynwrap.feynformat as fmt
 
 def shorthand_function(pose):
@@ -10,6 +11,8 @@ class vert:
     declarations_all = None
     propagatations_all = ''
     vertlist = []
+    path = '.'
+    filename = None
     
     def __init__(self, name = None, rel_pos=None):
         self.vi = len(vert.vertlist) + 1
@@ -49,30 +52,40 @@ class vert:
                         ]
     
     al, ar, bl, br = [shorthand_function(position) for position in common_positions]
-    
+
 
     @classmethod
-    def toTikz(cls):
+    def wrap_env(cls):
         vert.declarations_all = ''
         for vert_item in vert.vertlist:
             vert.declarations_all += vert_item.declaration
-        return (vert.declarations_all +
-                vert.propagatations_all)
+        return fmt.wrap_tikz(vert.declarations_all + 
+                             vert.propagatations_all )
 
     @classmethod
-    def wrapTikz(cls):
-        return ("\\begin{{tikzpicture}}"
-                "\n\\begin{{feynhand}}\n{}\n\\end{{feynhand}}"
-                "\n\\end{{tikzpicture}}\n").format(vert.toTikz() )
+    def save_tex(cls, filename, path=None, mode='w'):
+        if filename.endswith('.tex'):
+            filename = filename[:-4]
 
-    @classmethod
-    def saveas(cls, fname):
-        texfile = open(fname, mode="w")
-        texfile.write(vert.wrapTikz())
+        cls.filename = filename
+        if path:
+            cls.path = path
+        texfile = open(path+filename+'.tex', mode=mode)
+        texfile.write(fmt.headfoot.format(vert.wrap_env() ))
         texfile.close()
+    
+    @classmethod
+    def compile_pdf(cls, clean = ['tex']):
+        if cls.filename:
+            cleaning = 'rm {}.log {}.aux'.format(cls.filename, cls.filename)
+            for cleaned_suffix in clean:
+                cleaning += ' {}.{}'.format(cls.filename, cleaned_suffix)
+            bash("cd {}; pdflatex --interaction=batchmode {}; {}".format(cls.path, cls.filename, cleaning) )
+        else:
+            raise(FileNotFoundError('tex file not saved yet'))
 
     @classmethod
-    def append(cls, fname):
-        texfile = open(fname, mode="a")
-        texfile.write(vert.wrapTikz())
+    def append(cls, filename):
+        texfile = open(filename, mode="a")
+        texfile.write(vert.wrap_env() )
         texfile.close()
